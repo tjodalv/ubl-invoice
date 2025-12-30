@@ -15,6 +15,8 @@ use function Sabre\Xml\Deserializer\mixedContent;
 class Invoice implements XmlSerializable, XmlDeserializable
 {
     public $xmlTagName = "Invoice";
+    /** @var UBLExtension[] $ublExtensions */
+    private $ublExtensions = [];
     private $UBLVersionID = "2.1";
     private $customizationID = "1.0";
     private $profileID;
@@ -67,6 +69,34 @@ class Invoice implements XmlSerializable, XmlDeserializable
     public function setUBLVersionId(?string $UBLVersionID)
     {
         $this->UBLVersionID = $UBLVersionID;
+        return $this;
+    }
+
+    /**
+     * @return UBLExtension[]
+     */
+    public function getExtensions(): array
+    {
+        return $this->ublExtensions;
+    }
+
+    /**
+     * Register UBL extension's
+     *
+     * @param UBLExtension[] $extensions
+     * @return static
+     */
+    public function setExtensions(array $extensions): static
+    {
+        foreach($extensions as $ext) {
+            if (!$ext instanceof UBLExtension) {
+                throw new InvalidArgumentException(
+                    'Items of $extensions param must be instances of UBLExtension'
+                );
+            }
+        }
+
+        $this->ublExtensions = $extensions;
         return $this;
     }
 
@@ -728,6 +758,15 @@ class Invoice implements XmlSerializable, XmlDeserializable
     public function xmlSerialize(Writer $writer): void
     {
         $this->validate();
+
+        if (!empty($this->ublExtensions)) {
+            $writer->write([
+                [
+                    'name' => Schema::EXT . "UBLExtensions",
+                    'value' => $this->ublExtensions
+                ]
+            ]);
+        }
 
         $writer->write([
             Schema::CBC . "UBLVersionID" => $this->UBLVersionID,
