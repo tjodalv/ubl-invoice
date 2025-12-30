@@ -51,7 +51,7 @@ class Invoice implements XmlSerializable, XmlDeserializable
     private $accountingCostCode;
     private $accountingCost;
     private $invoicePeriod;
-    private $billingReference;
+    private $billingReferences;
     private $delivery;
     private $orderReference;
     private $contractDocumentReference;
@@ -660,11 +660,11 @@ class Invoice implements XmlSerializable, XmlDeserializable
     /**
      * Get the reference to the invoice that is being credited
      *
-     * @return ?BillingReference
+     * @return ?BillingReference[]
      */
-    public function getBillingReference(): ?BillingReference
+    public function getBillingReferences(): ?array
     {
-        return $this->billingReference;
+        return $this->billingReferences;
     }
 
     /**
@@ -672,9 +672,9 @@ class Invoice implements XmlSerializable, XmlDeserializable
      *
      * @return static
      */
-    public function setBillingReference(?BillingReference $billingReference)
+    public function setBillingReferences(?array $billingReferences)
     {
-        $this->billingReference = $billingReference;
+        $this->billingReferences = $billingReferences;
         return $this;
     }
 
@@ -972,10 +972,12 @@ class Invoice implements XmlSerializable, XmlDeserializable
             ]);
         }
 
-        if ($this->billingReference != null) {
-            $writer->write([
-                Schema::CAC . "BillingReference" => $this->billingReference,
-            ]);
+        if ($this->billingReferences !== null) {
+            foreach($this->billingReferences as $billingRef) {
+                $writer->write([
+                    Schema::CAC . $billingRef->xmlTagName => $billingRef,
+                ]);
+            }
         }
 
         if ($this->contractDocumentReference !== null) {
@@ -1281,8 +1283,8 @@ class Invoice implements XmlSerializable, XmlDeserializable
                     $collection,
                 ),
             )
-            ->setBillingReference(
-                ReaderHelper::getTagValue(
+            ->setBillingReferences(
+                ReaderHelper::getArrayValue(
                     Schema::CAC . "BillingReference",
                     $collection,
                 ),

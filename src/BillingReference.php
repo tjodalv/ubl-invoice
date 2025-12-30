@@ -13,6 +13,8 @@ use Sabre\Xml\XmlSerializable;
 
 class BillingReference implements XmlSerializable, XmlDeserializable
 {
+    public $xmlTagName = 'BillingReference';
+
     private $invoiceDocumentReference;
 
     /**
