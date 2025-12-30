@@ -319,6 +319,40 @@ $legalMonetaryTotal = (new LegalMonetaryTotal())
     ->setPayableAmount(1210.00);
 ```
 
+## Using UBL Extensions
+
+```php
+use NumNum\UBL\UBLExtension;
+
+// Create instance of invoice object
+$invoice = new Invoice();
+
+// Create custom XmlSerializable object for e.g. FiscalExtension
+$fiscalExtension = new FiscalExtension();
+
+$invoice->setExtensions([
+    // Extension's content can be just simple string
+    new UBLExtension("<hrextac:HRFISK20Data>...</hrextac:HRFISK20Data>"),
+
+    // or it can be (and should be in most cases) object that implements XmlSerializable
+    new UBLExtension($fiscalExtension)
+]);
+```
+
+If your extension(s) requires adding additional namespaces to the invoice document, you can do so easily using the `Generator` class:
+
+```php
+// when generating invoice with the Generator provide array of custom namespaces
+Generator::invoice($invoice, 'EUR', customNamespaces: [
+    'urn:mfin.gov.hr:schema:xsd:HRExtensionAggregateComponents-1' => 'hrextac'
+]);
+
+// or if generating credit note document
+Generator::creditNote($creditNote, 'EUR', customNamespace: [
+    'urn:mfin.gov.hr:schema:xsd:HRExtensionAggregateComponents-1' => 'hrextac'
+]);
+```
+
 ## Generating the XML
 
 ```php
