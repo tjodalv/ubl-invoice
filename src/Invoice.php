@@ -658,6 +658,33 @@ class Invoice implements XmlSerializable, XmlDeserializable
     }
 
     /**
+     * @deprecated Use getBillingReferences() instead.
+     * Returns the FIRST BillingReference only.
+     */
+    public function getBillingReference(): ?BillingReference
+    {
+        if (empty($this->billingReferences)) {
+            return null;
+        }
+
+        return $this->billingReferences[0];
+    }
+
+    /**
+     * @deprecated Use setBillingReferences() instead.
+     * Append billing reference to array
+     */
+    public function setBillingReference(BillingReference $billingReference): static
+    {
+        if ($this->billingReferences === null) {
+            $this->billingReferences = [];
+        }
+
+        $this->billingReferences[] = $billingReference;
+        return $this;
+    }
+
+    /**
      * Get the reference to the invoice that is being credited
      *
      * @return ?BillingReference[]
@@ -669,10 +696,10 @@ class Invoice implements XmlSerializable, XmlDeserializable
 
     /**
      * Set the reference to the invoice that is being credited
-     *
+     * @param ?BillingReference[]
      * @return static
      */
-    public function setBillingReferences(?array $billingReferences)
+    public function setBillingReferences(?array $billingReferences): static
     {
         $this->billingReferences = $billingReferences;
         return $this;
