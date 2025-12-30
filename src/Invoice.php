@@ -43,8 +43,13 @@ class Invoice implements XmlSerializable, XmlDeserializable
     private $additionalDocumentReferences = [];
     private $projectReference;
     private $documentCurrencyCode = "EUR";
+    private $taxCurrencyCode;
+    private $pricingCurrencyCode;
+    private $paymentCurrencyCode;
+    private $paymentAlternativeCurrencyCode;
     private $buyerReference;
     private $accountingCostCode;
+    private $accountingCost;
     private $invoicePeriod;
     private $billingReference;
     private $delivery;
@@ -186,7 +191,7 @@ class Invoice implements XmlSerializable, XmlDeserializable
      * @param string $time
      * @return static
      */
-    public function setIssueTime(string $time): static
+    public function setIssueTime(?string $time): static
     {
         $this->issueTime = $time;
         return $this;
@@ -225,6 +230,50 @@ class Invoice implements XmlSerializable, XmlDeserializable
     public function setDocumentCurrencyCode(?string $currencyCode = "EUR")
     {
         $this->documentCurrencyCode = $currencyCode;
+        return $this;
+    }
+
+    public function getTaxCurrencyCode(): ?string
+    {
+        return $this->taxCurrencyCode;
+    }
+
+    public function setTaxCurrencyCode(?string $currencyCode)
+    {
+        $this->taxCurrencyCode = $currencyCode;
+        return $this;
+    }
+
+    public function getPricingCurrencyCode(): ?string
+    {
+        return $this->pricingCurrencyCode;
+    }
+
+    public function setPricingCurrencyCode(?string $currencyCode)
+    {
+        $this->pricingCurrencyCode = $currencyCode;
+        return $this;
+    }
+
+    public function getPaymentCurrencyCode(): ?string
+    {
+        return $this->paymentCurrencyCode;
+    }
+
+    public function setPaymentCurrencyCode(?string $currencyCode)
+    {
+        $this->paymentCurrencyCode = $currencyCode;
+        return $this;
+    }
+
+    public function getPaymentAlternativeCurrencyCode(): ?string
+    {
+        return $this->paymentAlternativeCurrencyCode;
+    }
+
+    public function setPaymentAlternativeCurrencyCode(?string $currencyCode)
+    {
+        $this->paymentAlternativeCurrencyCode = $currencyCode;
         return $this;
     }
 
@@ -573,6 +622,24 @@ class Invoice implements XmlSerializable, XmlDeserializable
     }
 
     /**
+     * @return mixed
+     */
+    public function getAccountingCost(): ?string
+    {
+        return $this->accountingCost;
+    }
+
+    /**
+     * @param mixed $accountingCost
+     * @return static
+     */
+    public function setAccountingCost(?string $accountingCost)
+    {
+        $this->accountingCost = $accountingCost;
+        return $this;
+    }
+
+    /**
      * @return staticPeriod
      */
     public function getInvoicePeriod(): ?InvoicePeriod
@@ -851,9 +918,39 @@ class Invoice implements XmlSerializable, XmlDeserializable
             Schema::CBC . "DocumentCurrencyCode" => $this->documentCurrencyCode,
         ]);
 
+        if ($this->taxCurrencyCode !== null) {
+            $writer->write([
+                Schema::CBC . "TaxCurrencyCode" => $this->taxCurrencyCode,
+            ]);
+        }
+
+        if ($this->pricingCurrencyCode !== null) {
+            $writer->write([
+                Schema::CBC . "PricingCurrencyCode" => $this->pricingCurrencyCode,
+            ]);
+        }
+
+        if ($this->paymentCurrencyCode !== null) {
+            $writer->write([
+                Schema::CBC . "PaymentCurrencyCode" => $this->paymentCurrencyCode,
+            ]);
+        }
+
+        if ($this->paymentAlternativeCurrencyCode !== null) {
+            $writer->write([
+                Schema::CBC . "PaymentAlternativeCurrencyCode" => $this->paymentAlternativeCurrencyCode,
+            ]);
+        }
+
         if ($this->accountingCostCode !== null) {
             $writer->write([
                 Schema::CBC . "AccountingCostCode" => $this->accountingCostCode,
+            ]);
+        }
+
+        if ($this->accountingCost !== null) {
+            $writer->write([
+                Schema::CBC . "AccountingCost" => $this->accountingCost,
             ]);
         }
 
@@ -1059,6 +1156,12 @@ class Invoice implements XmlSerializable, XmlDeserializable
                     ),
                 )->toDateTime(),
             )
+            ->setIssueTime(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "IssueTime",
+                    $collection
+                )
+            )
             ->setDueDate(
                 Carbon::parse(
                     ReaderHelper::getTagValue(
@@ -1072,6 +1175,30 @@ class Invoice implements XmlSerializable, XmlDeserializable
                     Schema::CBC . "DocumentCurrencyCode",
                     $collection,
                 ),
+            )
+            ->setTaxCurrencyCode(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "TaxCurrencyCode",
+                    $collection
+                )
+            )
+            ->setPricingCurrencyCode(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "PricingCurrencyCode",
+                    $collection
+                )
+            )
+            ->setPaymentCurrencyCode(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "PaymentCurrencyCode",
+                    $collection
+                )
+            )
+            ->setPaymentAlternativeCurrencyCode(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "PaymentAlternativeCurrencyCode",
+                    $collection
+                )
             )
             ->setInvoiceTypeCode(
                 ($typeCode = ReaderHelper::getTagValue(
@@ -1139,6 +1266,12 @@ class Invoice implements XmlSerializable, XmlDeserializable
             ->setAccountingCostCode(
                 ReaderHelper::getTagValue(
                     Schema::CBC . "AccountingCostCode",
+                    $collection,
+                ),
+            )
+            ->setAccountingCost(
+                ReaderHelper::getTagValue(
+                    Schema::CBC . "AccountingCost",
                     $collection,
                 ),
             )
